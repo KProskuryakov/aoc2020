@@ -1,11 +1,5 @@
 main = do
   file <- readFile "input.txt"
-  let content = map (\s -> read s :: Int) $ lines file
-  let thePair = multTuple . head . filter is2020 $ cart content
-  print thePair
-
-cart c = [(x, y) | x <- c, y <- c]
-
-is2020 (a, b) = a + b == 2020
-
-multTuple (a, b) = a * b
+  let ints = map (\s -> read s :: Int) $ lines file
+  print $ head [i * (2020 - i) | i <- ints, (2020 - i) `elem` ints]
+  print $ head [i * j * (2020 - i - j) | i <- ints, j <- ints, (2020 - i - j) `elem` ints]

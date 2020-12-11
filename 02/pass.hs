@@ -1,17 +1,25 @@
-import Data.List.Split
+import Text.Parsec ( anyChar, char, digit, many1, parse, string )
+import Data.Either ( rights )
+import Data.List ( elemIndices )
 
 main = do
   file <- readFile "input.txt"
-  print $ sum $ map check $ lines file
+  let cmds = rights $ map (parse cmdParser "") $ lines file
+  print $ length $ filter valid1 cmds
+  print $ length $ filter valid2 cmds
 
-check l
-  | charcount >= low && charcount <= high = 1
-  | otherwise = 0
-  where 
-    broken = words l
-    char = head $ broken !! 1
-    charcount = length $ filter (== char) $ broken !! 2
-    range = splitOn "-" (head broken)
-    low = read $ head range
-    high = read $ last range 
-    
+cmdParser = do
+  low <- many1 digit
+  char '-'
+  high <- many1 digit
+  char ' '
+  target <- anyChar
+  string ": "
+  pass <- many1 anyChar
+  return (read low :: Int, read high :: Int, target, pass)
+
+valid1 (low, high, target, pass) = cnt >= low && cnt <= high
+  where cnt = length $ filter (== target) pass
+
+valid2 (low, high, target, pass) = (low `elem` hits) /= (high `elem` hits)
+  where hits = map (+1) $ elemIndices target pass
